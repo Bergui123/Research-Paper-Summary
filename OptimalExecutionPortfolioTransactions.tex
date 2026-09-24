@@ -1,0 +1,699 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{%
+  \textbf{Equation Reference} \\[0.4em]
+  \large Optimal Execution of Portfolio Transactions \\
+  \normalsize Almgren \& Chriss (December 2000)
+}
+\author{Symbol glossary and usage context for every numbered equation}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+\noindent\textbf{Context.} This paper solves the problem of liquidating a large block of $X$ shares over a fixed horizon $T$ without moving the market too adversely. It balances two competing forces: selling slowly limits market impact (lower expected cost) but exposes you to price risk (higher variance). The result is a family of optimal trading schedules called the \emph{efficient frontier of execution strategies}.
+
+% -----------------------------------------------------------------------
+\section{Price Dynamics (\S1)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (1) — Actual Mid-Price Dynamics}
+
+\begin{equation}
+  S_k = S_{k-1} + \sigma\sqrt{\tau}\,\xi_k - \tau\,g\!\left(\frac{n_k}{\tau}\right)
+\end{equation}
+
+\textbf{When used.} Defines how the mid-price evolves at each discrete time step~$k$.
+The three terms are: random diffusion, plus the previous price, minus the permanent
+market impact from your own trading.  Used as the starting point for all cost expressions.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$S_k$ & Mid-price at the end of period $k$ \\
+$S_{k-1}$ & Mid-price at the start of period $k$ \\
+$\sigma$ & Annualised volatility (daily: $\sigma/\sqrt{252}$) \\
+$\tau$ & Length of one interval; $\tau = T/N$ \\
+$\xi_k$ & i.i.d.\ random shock, $\mathbb{E}[\xi_k]=0$, $\operatorname{Var}[\xi_k]=1$ \\
+$n_k$ & Shares traded in interval $k$ (positive = sell) \\
+$g(v)$ & Permanent market-impact function; $v = n_k/\tau$ is the trade rate \\
+$\tau g(\cdots)$ & Permanent price depression per interval \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (2) — Effective Execution Price}
+
+\begin{equation}
+  \tilde{S}_k = S_{k-1} - h\!\left(\frac{n_k}{\tau}\right)
+\end{equation}
+
+\textbf{When used.} The actual price received per share when selling $n_k$ shares in
+interval $k$.  Unlike the mid-price $S_k$, this includes the additional \emph{temporary}
+slippage $h(\cdot)$ paid because your own order moves the market against you within the
+period.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\tilde{S}_k$ & Effective execution price received in period $k$ \\
+$h(v)$ & Temporary market-impact function; $v = n_k/\tau$ \\
+$h(n_k/\tau)$ & Immediate price depression within the interval \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Trading Cost Measurement (\S2)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (3) — Total Proceeds from Liquidation}
+
+\begin{equation}
+  \sum_{k=1}^{N} n_k\,\tilde{S}_k
+  = X S_0
+  - \sum_{k=1}^{N} \tau\,x_k\,g\!\left(\frac{n_k}{\tau}\right)
+  - \sum_{k=1}^{N} n_k\,h\!\left(\frac{n_k}{\tau}\right)
+\end{equation}
+
+\textbf{When used.} Decomposes total cash received into: (1)~the ``paper value'' $XS_0$
+if everything were sold at the initial price, minus (2)~permanent impact losses, minus
+(3)~temporary impact losses.  This accounting identity underpins all subsequent cost
+expressions.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$X$ & Total shares to liquidate \\
+$S_0$ & Initial stock price at time $0$ \\
+$x_k$ & Shares still held at the \emph{start} of interval $k$ (inventory) \\
+$\sum \tau x_k g(\cdots)$ & Cumulative permanent impact cost over the horizon \\
+$\sum n_k h(\cdots)$ & Cumulative temporary impact cost over the horizon \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (4) — Expected Shortfall $E(x)$}
+
+\begin{equation}
+  E(x) = \sum_{k=1}^{N} \tau\,x_k\,g\!\left(\frac{n_k}{\tau}\right)
+        + \sum_{k=1}^{N} n_k\,h\!\left(\frac{n_k}{\tau}\right)
+\end{equation}
+
+\textbf{When used.} The expected total transaction cost (implementation shortfall) for a
+given trading trajectory $x=\{x_1,\ldots,x_N\}$.  Random shocks cancel in expectation,
+leaving only the two deterministic impact terms.  Minimising $E(x)$ alone gives the
+constant-rate (VWAP) solution.  One of two objectives on the efficient frontier.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$E(x)$ & Expected cost of strategy $x$, relative to paper value \\
+$\sum \tau x_k g(\cdots)$ & Permanent impact contribution \\
+$\sum n_k h(\cdots)$ & Temporary impact contribution \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (5) — Variance of Shortfall $V(x)$}
+
+\begin{equation}
+  V(x) = \sigma^2 \sum_{k=1}^{N} \tau\,x_k^2
+\end{equation}
+
+\textbf{When used.} The variance of total realised P\&L around expected cost.  Because
+random shocks are i.i.d.\ and each remaining inventory $x_k$ is exposed to one period's
+noise, variance accumulates as $\sigma^2\tau$ per share squared.  Minimising $V(x)$ alone
+gives immediate liquidation.  The second objective on the efficient frontier.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$V(x)$ & Variance of cost for strategy $x$ \\
+$\sigma^2$ & Per-period variance of price move \\
+$\tau x_k^2$ & Variance contribution of interval $k$; proportional to inventory$^2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Linear Impact Model (\S3)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (6) — Linear Permanent Impact}
+
+\begin{equation}
+  g(v) = \gamma v
+\end{equation}
+
+\textbf{When used.} Specifies permanent price depression proportional to trade rate
+$v=n_k/\tau$.  The linearity makes the efficient frontier analytically tractable.
+$\gamma$ is calibrated from empirical bid-ask and depth data.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\gamma$ & Permanent impact coefficient (price/shares$^2$) \\
+$v = n_k/\tau$ & Trade rate (shares per unit time) in interval $k$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (7) — Linear Temporary Impact}
+
+\begin{equation}
+  h\!\left(\frac{n_k}{\tau}\right) = \varepsilon\operatorname{sgn}(n_k) + \frac{\eta}{\tau}\,n_k
+\end{equation}
+
+\textbf{When used.} Specifies the within-period execution cost.  The $\varepsilon$ term
+is a fixed bid-ask half-spread regardless of size; the $\eta/\tau$ term is
+size-proportional slippage.  Together they make trades expensive when done quickly.
+Substituted into $E(x)$ to give Eq.~(8).
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\varepsilon$ & Fixed per-share cost (half bid-ask spread) \\
+$\operatorname{sgn}(n_k)$ & $+1$ for sell, $-1$ for buy; ensures cost is always positive \\
+$\eta$ & Temporary impact coefficient (price$\cdot$time/shares$^2$) \\
+$\eta/\tau$ & Slippage per share; larger when $\tau$ is small (fast trading) \\
+$\tilde{\eta}$ & Shorthand $\tilde{\eta} = \eta - \tfrac{1}{2}\gamma\tau$ used to simplify later formulas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (8) — Expected Cost, Linear Model}
+
+\begin{equation}
+  E(x) = \tfrac{1}{2}\gamma X^2
+        + \varepsilon \sum_{k=1}^{N} |n_k|
+        + \frac{\tilde{\eta}}{\tau} \sum_{k=1}^{N} n_k^2
+\end{equation}
+
+\textbf{When used.} Substituting the linear impact functions (Eqs.~6--7) into $E(x)$
+(Eq.~4) yields this closed form.  The first term $\tfrac{1}{2}\gamma X^2$ is constant
+across all strategies and cannot be optimised away.  The second and third terms depend on
+the trade schedule $\{n_k\}$ and are targets for optimisation.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\tfrac{1}{2}\gamma X^2$ & Unavoidable permanent impact; constant across all strategies \\
+$\varepsilon\sum|n_k|$ & Total fixed-cost (spread) component; equals $\varepsilon X$ for a monotone sell \\
+$(\tilde{\eta}/\tau)\sum n_k^2$ & Total size-proportional slippage; penalises large, fast trades \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Boundary Strategies \& Efficient Frontier (\S4)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equations (9--11) — Minimum-Impact (Constant-Rate) Trajectory}
+
+\begin{align}
+  n_k &= \frac{X}{N}, \qquad x_k = \frac{(N-k)X}{N} \\[4pt]
+  E_{\mathrm{VWAP}} &= \tfrac{1}{2}\gamma X^2 + \varepsilon X
+                      + \frac{\tilde{\eta} X^2}{T}\!\left(1+\frac{1}{N}\right) \\[4pt]
+  V_{\mathrm{VWAP}} &= \tfrac{1}{3}\sigma^2 X^2 T
+                      \!\left(1-\frac{1}{N}\right)\!\left(1-\frac{1}{2N}\right)
+\end{align}
+
+\textbf{When used.} Solution to $\min E(x)$ ignoring variance.  Sells $X/N$ shares in
+each of the $N$ periods.  Minimises slippage by spreading trades evenly, but keeps large
+inventory exposed to risk for a long time.  One extreme of the efficient frontier (minimum
+cost, maximum variance).  As $N\to\infty$, $V_{\mathrm{VWAP}}\to\tfrac{1}{3}\sigma^2X^2T$.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$N$ & Total number of trading intervals \\
+$T$ & Total liquidation horizon \\
+$1/N$ terms & Finite-grid corrections; vanish as trading becomes continuous \\
+$\tfrac{1}{3}\sigma^2X^2T$ & Limiting variance: scales with $\sigma^2$, position$^2$, and time \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equations (12--13) — Minimum-Variance (Immediate) Liquidation}
+
+\begin{align}
+  n_1 &= X, \quad n_2 = n_3 = \cdots = n_N = 0 \\[4pt]
+  E_{\mathrm{imm}} &= \varepsilon X + \frac{\eta X^2}{\tau}, \qquad V_{\mathrm{imm}} = 0
+\end{align}
+
+\textbf{When used.} Solution to $\min V(x)$: sell everything immediately.  Variance is
+exactly zero (no time exposed to price moves) but execution cost is very high because the
+entire position is dumped in one period, incurring maximum slippage $\eta/\tau$.  The
+other extreme of the efficient frontier.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\eta X^2/\tau$ & Cost of trading $X$ shares in one interval of length $\tau$ \\
+$V=0$ & Zero risk because the position is closed immediately \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (14) — Constrained Efficient-Frontier Problem}
+
+\begin{equation}
+  \min_x\; E(x) \quad \text{subject to}\quad V(x) \leq V^*
+\end{equation}
+
+\textbf{When used.} Formal statement of the efficient frontier problem.  For each risk
+budget $V^*$, find the trajectory $x$ that minimises expected cost without exceeding that
+variance.  Tracing out all $V^*$ from $0$ to $V_{\mathrm{VWAP}}$ sweeps the full
+frontier.  Practitioners use this form when they have a hard risk constraint.
+
+\subsection*{Equation (15) — Unconstrained (Lagrangian) Problem}
+
+\begin{equation}
+  \min_x\; U(x) = E(x) + \lambda\,V(x)
+\end{equation}
+
+\textbf{When used.} Equivalent reformulation of Eq.~(14).  The Lagrange multiplier
+$\lambda$ converts the variance constraint into a penalty.  Each $\lambda\geq 0$
+corresponds to one point on the frontier: $\lambda=0$ recovers the constant-rate
+strategy; $\lambda\to\infty$ recovers immediate liquidation.  This is the workhorse
+equation for deriving the optimal trajectory.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\lambda$ & Risk-aversion parameter (Lagrange multiplier); $\lambda \geq 0$ \\
+$U(x)$ & Composite objective (utility) to minimise \\
+$\lambda V(x)$ & Variance penalty; scales with trader's risk aversion \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Optimal Trajectory Solution (\S5)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (16) — Optimality Condition (Euler--Lagrange)}
+
+\begin{equation}
+  \frac{x_{j-1} - 2x_j + x_{j+1}}{\tau^2} = \tilde{\kappa}^2\,x_j
+\end{equation}
+
+\textbf{When used.} First-order condition from differentiating $U(x)$ w.r.t.\ each $x_j$.
+It is a second-order linear difference equation — the discrete analogue of $x''=\kappa^2 x$.
+Its general solution involves hyperbolic functions.  Here
+$\tilde{\kappa}^2 = \lambda\sigma^2/\tilde{\eta}$ encodes the trade-off between risk and
+temporary impact cost.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\tilde{\kappa}^2$ & $\tilde{\kappa}^2 = \lambda\sigma^2/\tilde{\eta}$; controls speed of liquidation \\
+$(x_{j\pm1}-2x_j)/\tau^2$ & Discrete second derivative of the inventory trajectory \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (17) — Optimal Inventory Trajectory \texorpdfstring{$\bigstar$}{}}
+
+\begin{equation}
+  x_j = X\,\frac{\sinh\!\bigl(\kappa(T-t_j)\bigr)}{\sinh(\kappa T)}
+\end{equation}
+
+\textbf{When used.} Solution to Eq.~(16) satisfying boundary conditions $x_0=X$,
+$x_N=0$.  Tells you exactly how many shares to hold at each time $t_j = j\tau$.  The
+shape is convexly declining: sell faster at the start (to cut variance) and slow down near
+the end.  When $\kappa$ is large (high risk aversion) liquidation is nearly immediate;
+when $\kappa$ is small the schedule approaches constant-rate.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$x_j$ & Shares held at time $t_j = j\tau$ \\
+$\kappa$ & Continuous decay rate; $\kappa\approx\tilde{\kappa}$ for small $\tau$ \\
+$\sinh(\cdot)$ & Hyperbolic sine; $\sinh u = (e^u - e^{-u})/2$ \\
+$\sinh\!\bigl(\kappa(T-t_j)\bigr)$ & Remaining ``urgency'' at time $t_j$ \\
+$\sinh(\kappa T)$ & Normalisation using total horizon \\
+$\theta = 1/\kappa$ & Trade half-life: larger $\theta$ means slower execution \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (18) — Optimal Trade List \texorpdfstring{$\bigstar$}{}}
+
+\begin{equation}
+  n_j = X\,\frac{2\sinh\!\bigl(\tfrac{1}{2}\kappa\tau\bigr)}{\sinh(\kappa T)}
+        \cdot \cosh\!\Bigl(\kappa\bigl(T - t_{j-\frac{1}{2}}\bigr)\Bigr)
+\end{equation}
+
+\textbf{When used.} Derived from Eq.~(17) as $n_j = x_{j-1} - x_j$.  Gives the actual
+order size to submit at each interval.  The $\cosh$ factor produces a U-shaped schedule:
+larger trades at the start and end of the session.  This is the \emph{actionable output}
+of the model — the schedule of order sizes to pass to the trading desk.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$n_j$ & Shares to trade in interval $j$ \\
+$\cosh(\cdot)$ & Hyperbolic cosine; $\cosh u = (e^u + e^{-u})/2$ \\
+$t_{j-\frac{1}{2}}$ & Midpoint of interval $j$; $t_{j-\frac{1}{2}} = (j-\tfrac{1}{2})\tau$ \\
+$2\sinh(\tfrac{1}{2}\kappa\tau)/\sinh(\kappa T)$ & Normalisation ensuring $\sum_j n_j = X$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (19) — Approximation for $\kappa$}
+
+\begin{equation}
+  \kappa \approx \sqrt{\frac{\lambda\sigma^2}{\tilde{\eta}}}
+  \qquad\text{(continuous-time limit, small $\tau$)}
+\end{equation}
+
+\textbf{When used.} In the continuous limit $\tau\to 0$, $\tilde{\kappa}\to\kappa$ and
+$\kappa$ takes this simple form.  It makes the model interpretable: $\kappa^2$ increases
+with risk aversion $\lambda$ and volatility $\sigma^2$, decreases with temporary impact
+cost $\tilde{\eta}$.  The trade half-life $\theta = 1/\kappa$.
+
+\subsection*{Equation (20) — Efficient Frontier in Closed Form}
+
+\begin{align}
+  E(\kappa) &= \tfrac{1}{2}\gamma X^2
+              + \tilde{\eta}\kappa X^2
+                \frac{\coth(\kappa T)}{\tanh(\kappa\tau/2)}
+                \cdot\tfrac{1}{2} \\[4pt]
+  V(\kappa) &= \frac{\tfrac{1}{2}\sigma^2 X^2\,
+                \bigl[T\coth(\kappa T) - \tau\coth(\kappa\tau/2)\bigr]}
+               {\sinh^2(\kappa T)}
+\end{align}
+
+\textbf{When used.} Substituting Eqs.~(17)--(18) back into $E(x)$ and $V(x)$ gives these
+formulas parameterised by $\kappa$ (equivalently $\lambda$).  As $\kappa$ traces from $0$
+to $\infty$ the pair $(V(\kappa), E(\kappa))$ traces the entire efficient frontier in
+(risk, cost) space.  Used to plot the frontier and find the optimal $\kappa$ for a given
+risk tolerance.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\coth(\cdot)$ & Hyperbolic cotangent; $\coth u = \cosh u/\sinh u$ \\
+$\tanh(\cdot)$ & Hyperbolic tangent; $\tanh u = \sinh u/\cosh u$ \\
+$\sinh^2(\kappa T)$ & Normalisation denominator in variance formula \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Alternative Risk Criteria (\S6)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (21) — Mean-Variance Utility}
+
+\begin{equation}
+  U_{\mathrm{util}}(x) = E(x) + \lambda_u\,V(x)
+\end{equation}
+
+\textbf{When used.} A mean-variance utility where the trader chooses $\lambda_u$ to
+reflect their risk preferences.  Identical in form to Eq.~(15).  Natural choice for a
+trader with quadratic utility; the frontier parameterised by $\lambda_u$ is exactly the
+efficient frontier.
+
+\subsection*{Equation (22) — Liquidity-Adjusted Value at Risk (L-VaR)}
+
+\begin{equation}
+  \mathrm{VaR}_p(x) = E(x) + \lambda_v\,\sqrt{V(x)}
+\end{equation}
+
+\textbf{When used.} An alternative risk criterion for risk managers.  $\lambda_v = z_\alpha$
+is the $\alpha$-quantile of the standard normal (e.g.\ $\lambda_v\approx1.65$ for 95\%
+confidence), so $\mathrm{VaR}_p$ is the $\alpha$-quantile of implementation shortfall.
+Under L-VaR the optimal schedule differs from mean-variance because the penalty is on
+$\sqrt{V}$ rather than $V$.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\lambda_v$ & Normal quantile $z_\alpha$ (e.g.\ $1.65$ for 95\%, $2.33$ for 99\%) \\
+$\sqrt{V(x)}$ & Standard deviation of cost \\
+$E + \lambda_v\sqrt{V}$ & Mean plus scaled std dev $=$ upper confidence bound on cost \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Price Drift \& Serial Correlation (\S7)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (23) — Price Dynamics with Drift}
+
+\begin{equation}
+  S_k = S_{k-1} + \sigma\sqrt{\tau}\,\xi_k + \alpha\tau - \tau\,g\!\left(\frac{n_k}{\tau}\right)
+\end{equation}
+
+\textbf{When used.} Adds a deterministic drift $\alpha$ (expected return per unit time)
+to Eq.~(1).  If $\alpha>0$ the stock is expected to rise, so a rational seller should
+hold longer.  Starting point for the drift-adjusted optimal strategy.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\alpha$ & Expected price drift per unit time (may be negative) \\
+$\alpha\tau$ & Expected price change per interval due to drift \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (24) — Expected Cost with Drift}
+
+\begin{equation}
+  E(x) = \tfrac{1}{2}\gamma X^2
+        - \alpha\sum_{k=1}^{N}\tau x_k
+        + \varepsilon\sum_{k=1}^{N}|n_k|
+        + \frac{\tilde{\eta}}{\tau}\sum_{k=1}^{N}n_k^2
+\end{equation}
+
+\textbf{When used.} Extension of Eq.~(8) to include drift.  The new term
+$-\alpha\sum\tau x_k$ rewards holding inventory when $\alpha>0$ (drift reduces cost) and
+penalises holding when $\alpha<0$, shifting the optimal trajectory accordingly.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$-\alpha\sum\tau x_k$ & Drift benefit/cost; positive drift reduces expected cost \\
+$\sum\tau x_k$ & ``Time in market'' weighted by inventory; increases with slow execution \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (25) — Optimal Static Holding with Drift}
+
+\begin{equation}
+  \bar{x} = \frac{\alpha}{2\lambda\sigma^2}
+\end{equation}
+
+\textbf{When used.} The inventory level at which the marginal benefit of holding (drift
+$\alpha$) equals the marginal risk cost ($\lambda\sigma^2$).  In the drift-adjusted
+framework the optimal trajectory converges toward $\bar{x}$ rather than zero.  If
+$\bar{x}\geq X$, it is never optimal to sell at all.
+
+\subsection*{Equations (26--27) — Optimal Trajectory and Trades with Drift}
+
+\begin{align}
+  x_j(\alpha) &= x_j(0) + \frac{\bar{x}}{X}\,X\Bigl[1 - \tfrac{x_j(0)}{X}\Bigr] + \cdots \\[4pt]
+  n_j(\alpha) &= n_j(0) - \text{correction proportional to }\bar{x}
+\end{align}
+
+\textbf{When used.} Modifies the baseline trajectory (Eq.~17) and trade list (Eq.~18) to
+account for the drift correction proportional to $\bar{x}/X$.  When drift is zero,
+$\bar{x}=0$ and the baseline is recovered.  Used when the trader has a view on near-term
+price direction.
+
+\subsection*{Equation (28) — Serial Correlation Gain}
+
+\begin{equation}
+  \text{max gain per period} = \frac{\rho^2\sigma^2\tau^2}{4\eta}
+\end{equation}
+
+\textbf{When used.} When price returns have autocorrelation coefficient $\rho$, an
+optimal strategy can exploit the predictability.  This gives the maximum extra expected
+gain per interval from adjusting the trade schedule.  It vanishes when $\rho=0$ (i.i.d.\
+returns) or when $\eta$ is very large (exploiting autocorrelation is too costly).
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\rho$ & Autocorrelation coefficient of period returns; $|\rho|\leq1$ \\
+$\rho^2\sigma^2\tau^2$ & Predictable component of squared price move \\
+$4\eta$ & Temporary-impact cost of exploiting the predictability \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Multi-Asset Portfolio Extension (\S8)}
+% -----------------------------------------------------------------------
+
+\subsection*{Equation (29) — Multi-Asset Expected Cost}
+
+\begin{equation}
+  E[x] = \sum_{j=1}^{M}\left[
+    \tfrac{1}{2}\gamma_j X_j^2
+    + \varepsilon_j\sum_{k}|n_{jk}|
+    + \frac{\tilde{\eta}_j}{\tau}\sum_{k}n_{jk}^2
+  \right]
+\end{equation}
+
+\textbf{When used.} Extends Eq.~(8) to a portfolio of $M$ securities.  In the base
+model, expected cost decomposes asset-by-asset with no cross-impact terms.  Each security
+$j$ has its own parameters $\gamma_j$, $\varepsilon_j$, $\eta_j$.  Cross-asset coupling
+enters only through the variance (covariance matrix).
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$j$ & Index over securities $j = 1,\ldots,M$ \\
+$X_j$ & Total shares of security $j$ to liquidate \\
+$n_{jk}$ & Shares of security $j$ traded in period $k$ \\
+$\gamma_j,\varepsilon_j,\eta_j$ & Impact parameters specific to security $j$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (30) — Multi-Asset Variance \texorpdfstring{$\bigstar$}{}}
+
+\begin{equation}
+  V[x] = \sum_{k=1}^{N} \tau\,\mathbf{x}_k^\top\,C\,\mathbf{x}_k
+\end{equation}
+
+\textbf{When used.} The variance of total P\&L for a multi-asset portfolio, where $C$ is
+the $M\times M$ covariance matrix of asset returns per unit time.  Off-diagonal elements
+of $C$ capture diversification: correlated assets that are both sold amplify risk;
+negatively correlated assets partially offset.  The single-asset formula Eq.~(5) is
+recovered when $M=1$ and $C=\sigma^2$.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\mathbf{x}_k$ & $M$-dimensional inventory vector at time $k$ (one entry per asset) \\
+$C$ & $M\times M$ return covariance matrix (per unit time) \\
+$\mathbf{x}_k^\top C\,\mathbf{x}_k$ & Portfolio variance in period $k$; a quadratic form \\
+$\sum_k\tau(\cdots)$ & Cumulates variance contribution over all $N$ intervals \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (31) — Multi-Asset Optimality Condition}
+
+\begin{equation}
+  H\,\frac{\mathbf{x}_{j-1} - 2\mathbf{x}_j + \mathbf{x}_{j+1}}{\tau^2}
+  = \lambda C\,\mathbf{x}_j
+\end{equation}
+
+\textbf{When used.} Matrix generalisation of Eq.~(16).  $H$ is a diagonal matrix of
+$\tilde{\eta}_j$ values; $C$ is the covariance matrix.  The solution requires
+diagonalising $H^{-1}\lambda C$ (a generalised eigenvalue problem).  Each eigenvector of
+$H^{-1}C$ defines a ``principal portfolio'' with its own $\kappa_i$ and optimal
+trajectory; the full solution is a linear combination.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$H$ & Diagonal $M\times M$ matrix of temporary-impact coefficients $\tilde{\eta}_j$ \\
+$C$ & $M\times M$ covariance matrix of returns \\
+$H^{-1}C$ & Coupling matrix whose eigenvalues give the $\kappa_i$ values \\
+$\lambda$ & Scalar risk-aversion parameter (same for the whole portfolio) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Equation (32) — Diagonal Special Case}
+
+\begin{equation}
+  \Gamma_{jj} = \gamma_j, \qquad H_{jj} = \eta_j
+\end{equation}
+
+\textbf{When used.} When there is no cross-asset market impact, both impact matrices are
+diagonal.  Eq.~(31) then reduces to $M$ independent single-asset problems, each solved by
+its own $\sinh$-type trajectory.  Cross-asset effects enter only through $C$, coupling the
+optimal speeds for correlated assets.
+
+\begin{center}
+\begin{tabular}{@{}L{3.5cm}L{10cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\Gamma$ & $M\times M$ permanent impact matrix; diagonal $=$ no cross-asset impact \\
+$H$ & $M\times M$ temporary impact matrix; diagonal $=$ no cross-asset impact \\
+$\gamma_j, \eta_j$ & Per-asset impact scalars on the main diagonal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+\noindent\rule{\linewidth}{0.4pt}\\[0.3em]
+\small Almgren \& Chriss, ``Optimal Execution of Portfolio Transactions,'' December 2000.
+Equation reference compiled September 2026.
+
+\end{document}
