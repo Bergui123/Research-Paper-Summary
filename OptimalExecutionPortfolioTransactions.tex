@@ -1,5 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
 \usepackage{geometry}
 \usepackage{booktabs}
 \usepackage{array}
@@ -32,7 +33,7 @@
 
 \noindent\textbf{Context.} This paper solves the problem of liquidating a large block of $X$ shares over a fixed horizon $T$ without moving the market too adversely. It balances two competing forces: selling slowly limits market impact (lower expected cost) but exposes you to price risk (higher variance). The result is a family of optimal trading schedules called the \emph{efficient frontier of execution strategies}.
 % -----------------------------------------------------------------------
-\section{Terms (\S1)}
+\section{Terms (\texorpdfstring{\S}{§}1)}
 % -----------------------------------------------------------------------
 
 \noindent\textbf{Drift.} Drift is when an event, for example a earnings report could have an impact on the underlying stock price, this event will make the stock either move up or down, in this case we need to take into account the drift and assume something when we use the formulas under 
@@ -41,8 +42,9 @@
 \noindent\textbf{Naïve / VWAP strategy.} A naïve strategy, also known as a VWAP (Volume Weighted Average Price) strategy, executes trades evenly over the trading horizon, aiming to match the average market volume profile. It does not adapt to market conditions and is considered a static strategy.
 \noindent\textbf{VaR.} Value at Risk (VaR) is a measure of the potential loss in value of a portfolio over a defined period for a given confidence interval. It is used to quantify the price risk associated with holding a position.
 \noindent\textbf{L-VaR.} Liquidity-adjusted Value at Risk (L-VaR) extends the traditional VaR measure by incorporating the impact of liquidity on potential losses. It accounts for the fact that large trades can move the market, increasing the risk of adverse price movements.
+\noindent\textbf{Risk Aversion.} Denoted by $\lambda$, it represents the trader's tolerance for risk. A higher value of $\lambda$ indicates greater aversion to price risk, leading to more conservative trading strategies that prioritize minimizing variance over expected cost.
 % -----------------------------------------------------------------------
-\section{Price Dynamics (\S1)}
+\section{Price Dynamics (\texorpdfstring{\S}{§}1)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (1) — Actual Mid-Price Dynamics}
@@ -96,7 +98,7 @@ $h(n_k/\tau)$ & Immediate price depression within the interval \\
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Trading Cost Measurement (\S2)}
+\section{Trading Cost Measurement (\texorpdfstring{\S}{§}2)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (3) — Total Proceeds from Liquidation}
@@ -175,7 +177,7 @@ $\tau x_k^2$ & Variance contribution of interval $k$; proportional to inventory$
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Linear Impact Model (\S3)}
+\section{Linear Impact Model (\texorpdfstring{\S}{§}3)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (6) — Linear Permanent Impact}
@@ -250,7 +252,7 @@ $(\tilde{\eta}/\tau)\sum n_k^2$ & Total size-proportional slippage; penalises la
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Boundary Strategies \& Efficient Frontier (\S4)}
+\section{Boundary Strategies \& Efficient Frontier (\texorpdfstring{\S}{§}4)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equations (9--11) — Minimum-Impact (Constant-Rate) Trajectory}
@@ -340,7 +342,7 @@ $\lambda V(x)$ & Variance penalty; scales with trader's risk aversion \\
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Optimal Trajectory Solution (\S5)}
+\section{Optimal Trajectory Solution (\texorpdfstring{\S}{§}5)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (16) — Optimality Condition (Euler--Lagrange)}
@@ -461,7 +463,7 @@ $\sinh^2(\kappa T)$ & Normalisation denominator in variance formula \\
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Alternative Risk Criteria (\S6)}
+\section{Alternative Risk Criteria (\texorpdfstring{\S}{§}6)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (21) — Mean-Variance Utility}
@@ -500,7 +502,7 @@ $E + \lambda_v\sqrt{V}$ & Mean plus scaled std dev $=$ upper confidence bound on
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Price Drift \& Serial Correlation (\S7)}
+\section{Price Drift \& Serial Correlation (\texorpdfstring{\S}{§}7)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (23) — Price Dynamics with Drift}
@@ -595,7 +597,7 @@ $4\eta$ & Temporary-impact cost of exploiting the predictability \\
 \end{center}
 
 % -----------------------------------------------------------------------
-\section{Multi-Asset Portfolio Extension (\S8)}
+\section{Multi-Asset Portfolio Extension (\texorpdfstring{\S}{§}8)}
 % -----------------------------------------------------------------------
 
 \subsection*{Equation (29) — Multi-Asset Expected Cost}
